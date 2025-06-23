@@ -36,7 +36,7 @@ jobs:
 
       # Étape 4: S'authentifier auprès de Hugging Face Hub
       - name: Login to Hugging Face Hub
-        uses: huggingface/login@v2
+        uses: huggingface/login@v3
         with:
           token: ${{ secrets.HF_TOKEN }}
 
@@ -58,10 +58,10 @@ jobs:
 
       # Étape 6: Pousser les fichiers sur le Hub
       - name: Push to Hugging Face Hub
-        uses: huggingface/hub-upload@v2
+        uses: huggingface/hub-upload@v3
         with:
           # Remplacez par votre repo_id Hugging Face
-          repo_id: "votre-username-hf/votre-repo-hf"
+          repo_id: "Hiroshi99/Model_SN_GitHub"
           # Le dossier local qui contient les fichiers à pousser
           folder_path: "hf_deployment"
           # Type de repo, ici 'model'
@@ -99,7 +99,7 @@ jobs:
             
             Le commit déclencheur est : ${{ github.sha }}
             
-            Vous pouvez voir le modèle ici : https://huggingface.co/votre-username-hf/votre-repo-hf
+            Vous pouvez voir le modèle ici : https://huggingface.co/Hiroshi99/Model_SN_GitHub
             
             Cordialement,
             Votre Workflow GitHub.
