@@ -35,7 +35,7 @@ def predict(model_path, data):
         print(f"Prédiction pour les données {data} : {prediction}")
         return prediction
     except FileNotFoundError:
-        print(f"Erreur : Le fichier du modèle '{model_path}' n'a pas été trouvé.")
+        print(f"Erreur : Le fichier du modèle '{model_path}' n'a pas  été trouvé.")
         return None
 
 # --- Point d'entrée du script ---
