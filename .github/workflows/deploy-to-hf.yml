@@ -36,7 +36,7 @@ jobs:
 
       # Étape 4: S'authentifier auprès de Hugging Face Hub
       - name: Login to Hugging Face Hub
-        uses: huggingface/login@v3
+        uses: huggingface/login@v1
         with:
           token: ${{ secrets.HF_TOKEN }}
 
@@ -58,7 +58,7 @@ jobs:
 
       # Étape 6: Pousser les fichiers sur le Hub
       - name: Push to Hugging Face Hub
-        uses: huggingface/hub-upload@v3
+        uses: huggingface/hub-upload@v1
         with:
           # Remplacez par votre repo_id Hugging Face
           repo_id: "Hiroshi99/Model_SN_GitHub"
