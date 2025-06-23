@@ -63,7 +63,7 @@ jobs:
           # Remplacez par votre repo_id Hugging Face
           repo_id: "Hiroshi99/Model_SN_GitHub"
           # Le dossier local qui contient les fichiers à pousser
-          folder_path: "hf_deployment"
+          folder_path: "SN_git"
           # Type de repo, ici 'model'
           repo_type: model
           # Optionnel: message de commit
