@@ -69,3 +69,37 @@ jobs:
           # Optionnel: message de commit
           commit_message: "Automatic deployment from GitHub Actions"
           
+      # ---- NOUVEAU JOB ----
+      
+  send-notification:
+    if: success()
+    needs: deploy-to-hub
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          # Informations du serveur SMTP (exemple pour Gmail)
+          server_address: smtp.gmail.com
+          server_port: 465
+          
+          # Vos identifiants stockés dans les secrets
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          
+          # Contenu de l'email
+          subject: "Déploiement Réussi: ${{ github.repository }}"
+          to: ${{ secrets.MAIL_USERNAME }} # Envoyer à vous-même ou une autre adresse
+          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            Bonjour,
+            
+            Le déploiement sur le Hugging Face Hub pour le dépôt ${{ github.repository }} a réussi !
+            
+            Le commit déclencheur est : ${{ github.sha }}
+            
+            Vous pouvez voir le modèle ici : https://huggingface.co/votre-username-hf/votre-repo-hf
+            
+            Cordialement,
+            Votre Workflow GitHub.
