@@ -1,105 +1,75 @@
-# Nom du workflow qui apparaîtra dans l'onglet "Actions" de GitHub
 name: Deploy to Hugging Face Hub
 
-# Déclencheur : Ce workflow se lance à chaque 'push' sur la branche 'main'
 on:
   push:
     branches:
       - main
 
 jobs:
-  # Nom du job (vous pouvez l'appeler comme vous voulez)
   deploy-to-hub:
-    # Le type de machine sur lequel le job va tourner
     runs-on: ubuntu-latest
     
     steps:
-      # Étape 1: Récupérer le code de votre dépôt
+      # Étape 1 : Cloner le dépôt
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          # On a besoin de l'historique complet pour Git LFS
           fetch-depth: 0 
           lfs: true
 
-      # Étape 2: Mettre en place Python
+      # Étape 2 : Configurer Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9' # Vous pouvez choisir votre version de Python
+          python-version: '3.9'
 
-      # Étape 3: Installer les dépendances
+      # Étape 3 : Installer les dépendances
       - name: Install dependencies
         run: |
-          pip install huggingface_hub
-          pip install scikit-learn joblib numpy
+          pip install huggingface_hub scikit-learn joblib numpy
 
-      # Étape 4: S'authentifier auprès de Hugging Face Hub
-      - name: Login to Hugging Face Hub
-        uses: huggingface/login@v1
-        with:
-          token: ${{ secrets.HF_TOKEN }}
-
-      # Étape 5: Créer le dossier pour le déploiement et y copier les fichiers
-      # On va créer un dossier temporaire pour y mettre tout ce qu'on veut pousser
-      - name: Prepare files for Hugging Face Hub
+      # Étape 4 : Préparer les fichiers de déploiement
+      - name: Prepare deployment folder
         run: |
           mkdir hf_deployment
-          # Exécuter le script pour générer le modèle
           python script_python.py
-          
-          # Copier les fichiers pertinents dans le dossier de déploiement
           cp script_python.py hf_deployment/
           cp simple_model.joblib hf_deployment/
           cp README.md hf_deployment/
-          
           echo "Contenu du dossier de déploiement :"
           ls -l hf_deployment
 
-      # Étape 6: Pousser les fichiers sur le Hub
-      - name: Push to Hugging Face Hub
-        uses: huggingface/hub-upload@v1
-        with:
-          # Remplacez par votre repo_id Hugging Face
-          repo_id: "Hiroshi99/Model_SN_GitHub"
-          # Le dossier local qui contient les fichiers à pousser
-          folder_path: "SN_git"
-          # Type de repo, ici 'model'
-          repo_type: model
-          # Optionnel: message de commit
-          commit_message: "Automatic deployment from GitHub Actions"
-          
-      # ---- NOUVEAU JOB ----
-      
+      # Étape 5 : Déployer sur Hugging Face via script Python
+      - name: Deploy to Hugging Face via script
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python deploy_to_huggingface.py
+
   send-notification:
     if: success()
     needs: deploy-to-hub
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Send email notification
         uses: dawidd6/action-send-mail@v3
         with:
-          # Informations du serveur SMTP (exemple pour Gmail)
           server_address: smtp.gmail.com
           server_port: 465
-          
-          # Vos identifiants stockés dans les secrets
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          
-          # Contenu de l'email
-          subject: "Déploiement Réussi: ${{ github.repository }}"
-          to: ${{ secrets.MAIL_USERNAME }} # Envoyer à vous-même ou une autre adresse
+          subject: "✅ Déploiement Réussi : ${{ github.repository }}"
+          to: ${{ secrets.MAIL_USERNAME }}
           from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
           body: |
             Bonjour,
-            
-            Le déploiement sur le Hugging Face Hub pour le dépôt ${{ github.repository }} a réussi !
-            
-            Le commit déclencheur est : ${{ github.sha }}
-            
-            Vous pouvez voir le modèle ici : https://huggingface.co/Hiroshi99/Model_SN_GitHub
-            
-            Cordialement,
-            Votre Workflow GitHub.
+
+            Le déploiement du modèle vers Hugging Face Hub est terminé avec succès.
+
+            ✅ Repo : ${{ github.repository }}
+            🔁 Commit : ${{ github.sha }}
+            🔗 Modèle en ligne : https://huggingface.co/Hiroshi99/Model_SN_GitHub
+
+            Bien cordialement,
+            Votre pipeline GitHub Actions.
