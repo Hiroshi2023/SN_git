@@ -15,5 +15,5 @@ api.upload_folder(
     folder_path=folder_path,
     repo_id="Hiroshi99/Model_SN_GitHub",
     repo_type="model",
-    commit_message="Déploiement automatique depuis GitHub Actions"
+    commit_message="Déploiement automatiques depuis GitHub Actions"
 )
