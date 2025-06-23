@@ -1,0 +1,71 @@
+# Nom du workflow qui apparaîtra dans l'onglet "Actions" de GitHub
+name: Deploy to Hugging Face Hub
+
+# Déclencheur : Ce workflow se lance à chaque 'push' sur la branche 'main'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Nom du job (vous pouvez l'appeler comme vous voulez)
+  deploy-to-hub:
+    # Le type de machine sur lequel le job va tourner
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Étape 1: Récupérer le code de votre dépôt
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          # On a besoin de l'historique complet pour Git LFS
+          fetch-depth: 0 
+          lfs: true
+
+      # Étape 2: Mettre en place Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9' # Vous pouvez choisir votre version de Python
+
+      # Étape 3: Installer les dépendances
+      - name: Install dependencies
+        run: |
+          pip install huggingface_hub
+          pip install scikit-learn joblib numpy
+
+      # Étape 4: S'authentifier auprès de Hugging Face Hub
+      - name: Login to Hugging Face Hub
+        uses: huggingface/login@v2
+        with:
+          token: ${{ secrets.HF_TOKEN }}
+
+      # Étape 5: Créer le dossier pour le déploiement et y copier les fichiers
+      # On va créer un dossier temporaire pour y mettre tout ce qu'on veut pousser
+      - name: Prepare files for Hugging Face Hub
+        run: |
+          mkdir hf_deployment
+          # Exécuter le script pour générer le modèle
+          python script_python.py
+          
+          # Copier les fichiers pertinents dans le dossier de déploiement
+          cp script_python.py hf_deployment/
+          cp simple_model.joblib hf_deployment/
+          cp README.md hf_deployment/
+          
+          echo "Contenu du dossier de déploiement :"
+          ls -l hf_deployment
+
+      # Étape 6: Pousser les fichiers sur le Hub
+      - name: Push to Hugging Face Hub
+        uses: huggingface/hub-upload@v2
+        with:
+          # Remplacez par votre repo_id Hugging Face
+          repo_id: "votre-username-hf/votre-repo-hf"
+          # Le dossier local qui contient les fichiers à pousser
+          folder_path: "hf_deployment"
+          # Type de repo, ici 'model'
+          repo_type: model
+          # Optionnel: message de commit
+          commit_message: "Automatic deployment from GitHub Actions"
+          
